@@ -3,6 +3,7 @@ import Table from './Table'
 
 import dynamic from 'next/dynamic'
 import BarChart from './BarChart'
+import AntdComponent from './AntdComponent'
 
 const ComponentToPrint = forwardRef<HTMLDivElement>((props, ref) => {
 
@@ -816,9 +817,8 @@ const ComponentToPrint = forwardRef<HTMLDivElement>((props, ref) => {
           </div>
         </div>
       </div>
+      <AntdComponent />
     </div>
-    // <div ref={ref} id="invoice">
-    // </div>
   )
 })
 ComponentToPrint.displayName = "ComponentToPrint"

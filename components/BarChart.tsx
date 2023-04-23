@@ -22,7 +22,7 @@ const BarChart = () => {
     }]
   }]
   return (
-    <Chart options={options} series={series}></Chart>
+    <Chart options={options} series={series} width={500} height={400}></Chart>
   )
 }
 export default memo(BarChart)
