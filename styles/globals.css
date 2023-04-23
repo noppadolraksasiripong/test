@@ -1,12 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
+* {
+  box-sizing: border-box;
+}
+/* :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-}
+} */
 
 /* @media (prefers-color-scheme: dark) {
   :root {
@@ -16,10 +18,10 @@
   }
 } */
 
-body {
+/* body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(to bottom, transparent, rgb(var(--background-end-rgb))) rgb(var(--background-start-rgb));
-}
+} */
 
 body {
   font-size: 0.75rem;
@@ -28,17 +30,23 @@ body {
   color: #000000;
   margin: 0 auto;
   position: relative;
+  /* background-color: black; */
+  margin: auto;
 }
+#invoice {
+  overflow: auto;
 
+  width: 1240px;
+}
 #pspdfkit-header {
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 2px;
   font-weight: 400;
   color: #717885;
-  margin-top: 2.5rem;
-  margin-bottom: 2.5rem;
   width: 100%;
+  border: 10px solid black;
+  padding: 20px;
 }
 
 .header-columns {
@@ -51,7 +59,7 @@ body {
 .logo {
   height: 1.5rem;
   width: auto;
-  margin-right: 1rem;
+  padding-right: 1rem;
 }
 
 .logotype {
@@ -73,15 +81,16 @@ h4 {
 }
 
 .page {
-  margin-left: 5rem;
-  margin-right: 5rem;
+  padding-left: 5rem;
+  padding-right: 5rem;
 }
 table {
-  break-inside: avoid;
+  /* break-inside: avoid; */
+  page-break-after: always;
 }
 
 thead {
-  display: table-header-group;
+  page-break-after: always;
 }
 tfoot {
   display: table-row-group;
@@ -142,7 +151,7 @@ div {
 .form {
   display: flex;
   flex-direction: column;
-  margin-top: 6rem;
+  padding-top: 6rem;
 }
 
 .no-border {
@@ -252,8 +261,7 @@ input#signature {
   font-weight: 500;
   color: #717885;
   margin-top: 2.5rem;
-  bottom: 2.5rem;
-  position: absolute;
+
   width: 100%;
 }
 
@@ -262,4 +270,23 @@ input#signature {
   justify-content: space-between;
   padding-left: 2.5rem;
   padding-right: 2.5rem;
+}
+
+.inside {
+  width: 1240px;
+  /* height: 1754px; */
+  height: 500px;
+  background-color: red;
+}
+.border1 {
+  border: 20px solid black;
+}
+.border2 {
+  border: 20px solid blue;
+}
+.border3 {
+  border: 20px solid purple;
+}
+.border4 {
+  border: 20px solid green;
 }
