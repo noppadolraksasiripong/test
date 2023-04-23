@@ -10,27 +10,13 @@ export default function Home() {
   // const button = document.getElementById("download-button");
   const refNode = useRef<HTMLDivElement>(null)
   async function generatePDF() {
-    // const element = document.getElementById("invoice")
-    // const opt = {
-    //   pagebreak: {
-    //     mode: ["avoid-all", "css", "legacy"]
-    //   }
-    // }
-    // html2pdf().from(element).set(opt).save()
-    // console.log("generate it !")
-    // const doc = new jsPDF({
-    //   orientation: "landscape",
-    //   unit: "in",
-    //   format: [4, 2]
-    // })
-    // applyPlugin(jsPDF)
 
     function getChildrenHeight(children: Element) {
       const height = children.scrollHeight
       return ['border-top-width', 'border-bottom-width', 'margin-top', 'margin-bottom']
         // get array of margin and border
         .map(side => parseFloat(window.getComputedStyle(children)
-          .getPropertyValue(`${side}`)
+          .getPropertyValue(side)
           .replace('px', '')
         ))
         //sum it with height
@@ -40,50 +26,42 @@ export default function Home() {
     if (refNode.current) {
 
       //default state
-
-      const ratio = 1.4142 // A4 ratio (width:height)
-      const ratioWidth = 0.821 // canvas to pdf
+      const ratio = 1.4145 // A4 ratio (width:height)
+      // const ratioWidth = 0.821 // canvas to pdf
       const width = 1240 // Set a default width for the PDF (in pixels)
-      const height = 1754
-
-      let sX = 0
-
-      let dX = 0
-      let dY = 0
-
-      let usedHeight = 0
+      const height = Math.trunc(width * ratio) // relate to width
+      console.log('🚀 ~ file: index.tsx:33 ~ height:', height)
       const tableClassName = 'pdf-table'
+      let usedHeight = 0
       //create PDF
       const pdf = new jsPDF("p", "pt", [width, height], true)
+      //more method when use table
+      if (refNode.current.className.search(tableClassName) === -1) {
+        console.log('use table')
 
+      }
 
       //loop for each children div
       for (let i = 0; i < refNode.current.children.length; i++) {
         const children = refNode.current.children[i]
         const childrenHeight = getChildrenHeight(children)
-        console.log('🚀 ~ file: index.tsx:63 ~ childrenHeight:', childrenHeight)
-        await toPng(children as HTMLElement).then((canvasDataURL) => {
+        const canvasDataURL = await toPng(children as HTMLElement)
 
-          // const canvasHeight = canvas.height
-
-          if (childrenHeight + usedHeight > height) {
-            pdf.addPage() //8.5" x 11" in pts (in*72)
-            //reset useHeight
-            usedHeight = 0
-            pdf.addImage(canvasDataURL, 'PNG', 0, usedHeight, (width), childrenHeight, `alias-${i}`)
-            usedHeight += childrenHeight
-          } else {
-            pdf.addImage(canvasDataURL, 'PNG', 0, usedHeight, (width), childrenHeight, `alias-${i}`)
-            usedHeight += childrenHeight
-          }
-        })
+        const canInsert = childrenHeight + usedHeight > height
+        if (canInsert) {
+          pdf.addPage() //8.5" x 11" in pts (in*72)
+          //reset useHeight
+          usedHeight = 0
+          pdf.addImage(canvasDataURL, 'PNG', 0, usedHeight, (width), childrenHeight)
+          usedHeight += childrenHeight
+        } else {
+          pdf.addImage(canvasDataURL, 'PNG', 0, usedHeight, (width), childrenHeight)
+          usedHeight += childrenHeight
+        }
 
 
-        // //more method when use table
-        // if (children.className.search(tableClassName) === -1) {
-        //   console.log('use table')
-        //   continue
-        // }
+
+
         //height include margin and border
 
 
