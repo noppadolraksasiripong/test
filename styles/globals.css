@@ -290,3 +290,15 @@ input#signature {
 .border4 {
   border: 20px solid green;
 }
+
+
+#header-pdf {
+  background-color: yellow;
+  width: 100%;
+  height: 150px;
+}
+#footer-pdf {
+  background-color: blueviolet;
+  width: 100%;
+  height: 50px;
+}
