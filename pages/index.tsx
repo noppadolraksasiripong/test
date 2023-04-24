@@ -6,6 +6,7 @@ import { toPng } from 'html-to-image'
 export default function Home() {
   // const button = document.getElementById("download-button");
   const refNode = useRef<HTMLDivElement>(null)
+
   async function generatePDF() {
     if (refNode.current) {
       //default state
@@ -41,23 +42,24 @@ export default function Home() {
         const canvasDataURL = await toPng(children as HTMLElement)
         const isFull = childrenHeight + usedHeight > height
         if (isFull) {
-          if (page === 1) {
-            addFooterPageNumber()
-          }
+
           addPage()
           //reset useHeight
           usedHeight = 0 + footerHeight + headerHeight
         }
         addImage(canvasDataURL, usedHeight - footerHeight, childrenHeight)
       }
-      if (pdf.getCurrentPageInfo().pageNumber === 1) {
-        addFooterPageNumber()
+
+      //add footer pages 
+      for (let i = 1; i <= pdf.getNumberOfPages(); i++) {
+        pdf.setPage(i)
+        addFooterPageNumber(i)
       }
 
       pdf.save('New.pdf')
 
 
-      function addFooterPageNumber() {
+      function addFooterPageNumber(page: number) {
         const text = `page: ${page}`
         var footerX = pdf.internal.pageSize.getWidth() / 2
         var footerY = pdf.internal.pageSize.getHeight() - 10
@@ -83,7 +85,6 @@ export default function Home() {
       function addPage() {
         pdf.addPage() //8.5" x 11" in pts (in*72)
         page++
-        addFooterPageNumber() //`page: ${page}`
         if (header) {
           addHeader()
         }
@@ -104,10 +105,12 @@ export default function Home() {
 
   return (
     <>
-      <header id="header-pdf">This is header</header>
+      <header></header>
+      {/* <div id="header-pdf">This is header</div> */}
       <button onClick={generatePDF}>Print this out!</button>
       <ComponentToPrint ref={refNode} />
-      <footer id="footer-pdf">This is footer</footer>
+      {/* <div id="footer-pdf">This is footer</div> */}
+      <footer></footer>
     </>
   )
 }
