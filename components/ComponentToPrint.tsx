@@ -5,10 +5,13 @@ import dynamic from 'next/dynamic'
 import BarChart from './BarChart'
 import AntdComponent from './AntdComponent'
 
-const ComponentToPrint = forwardRef<HTMLDivElement>((props, ref) => {
-
+type Props = {
+  setIsLoading: (val: boolean) => void
+}
+const ComponentToPrint = ({ setIsLoading }: Props) => {
+  setIsLoading(false)
   return (
-    <div ref={ref} id="invoice">
+    <div id="invoice">
       <div id="pspdfkit-header">
         <div className="header-columns">
           <div className="logotype">
@@ -742,11 +745,13 @@ const ComponentToPrint = forwardRef<HTMLDivElement>((props, ref) => {
           </div>
         </div>
       </div>
+      <div>
 
-      <div className="inside border1"> Hello world</div>
-      <div className="inside border2"> Hello world2</div>
-      <div className="inside border3"> Hello world3</div>
-      <div className="inside border4"> Hello world4</div>
+        <div className="inside border1"> Hello world</div>
+        <div className="inside border2"> Hello world2</div>
+        <div className="inside border3"> Hello world3</div>
+        <div className="inside border4"> Hello world4</div>
+      </div>
       <div>
 
         <BarChart />
@@ -820,6 +825,5 @@ const ComponentToPrint = forwardRef<HTMLDivElement>((props, ref) => {
       <AntdComponent />
     </div>
   )
-})
-ComponentToPrint.displayName = "ComponentToPrint"
+}
 export default ComponentToPrint

@@ -33,11 +33,7 @@ body {
   /* background-color: black; */
   margin: auto;
 }
-#invoice {
-  overflow: auto;
 
-  width: 1240px;
-}
 #pspdfkit-header {
   font-size: 0.625rem;
   text-transform: uppercase;
@@ -95,13 +91,13 @@ thead {
 tfoot {
   display: table-row-group;
 }
-tr,
+/* tr,
 table,
 div {
   page-break-after: avoid !important;
   page-break-before: avoid !important;
   page-break-inside: avoid !important;
-}
+} */
 
 .intro-table {
   display: flex;
@@ -293,12 +289,50 @@ input#signature {
 
 
 #header-pdf {
-  background-color: yellow;
-  width: 100%;
-  height: 150px;
+  width: 1240px;
+  display: none;
+  overflow: auto;
+  
+  
+} 
+.header-container {
+    background-color: yellow;
+    height: 150px;
+    border: 5px solid seagreen;
 }
 #footer-pdf {
-  background-color: blueviolet;
-  width: 100%;
+  width: 1240px;
+  
+  display: none;
+  overflow: auto;
+  
+}
+.footer-container {
   height: 50px;
+  background-color: blueviolet;
+}
+
+#invoice {
+  overflow: auto;
+
+  width: 1240px;
+  display: none;
+}
+.iframe-container {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  width: 80%;
+  margin : auto;
+  padding-top: 141.4%
+}
+
+.responsive-iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
 }

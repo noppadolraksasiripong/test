@@ -1,53 +1,62 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import ComponentToPrint from '@/components/ComponentToPrint'
 import jsPDF from 'jspdf'
-import React, { useRef } from 'react'
+import React, { Suspense, useState } from 'react'
 import { toPng } from 'html-to-image'
+import dynamic from 'next/dynamic'
+const ComponentToPrint = dynamic(() => import('@/components/ComponentToPrint'), {
+  loading: () => <></>,
+  ssr: false,
+})
+const ButtonPrint = dynamic(() => import('@/components/ButtonPrint'), {
+  loading: () => <div></div>,
+  ssr: false,
+})
 export default function Home() {
-  // const button = document.getElementById("download-button");
-  const refNode = useRef<HTMLDivElement>(null)
-
-  async function generatePDF() {
-    if (refNode.current) {
+  const [isLoading, setIsLoading] = useState(true)
+  const generatePDF = async () => {
+    if (typeof window === 'undefined') return
+    const refNode: HTMLElement | null = document.getElementById("invoice")
+    const footer: HTMLElement | null = document.getElementById('footer-pdf')
+    const header: HTMLElement | null = document.getElementById('header-pdf')
+    if (refNode && footer && header) {
+      setStyle(header)
+      setStyle(footer)
+      setStyle(refNode)
       //default state
       const ratio = 1.4145 // A4 ratio (width:height)
       const width = 1240 // Set a default width for the PDF (in pixels)
       const height = Math.trunc(width * ratio)
-      let page = 1
-      let footerHeight = 0
-      let headerHeight = 0
-      let usedHeight = 0
+
       const pdf = new jsPDF("p", "pt", [width, height], true)
 
-      const header = document.getElementById('header-pdf')
-      let headerDataURL = ''
-      let footerDataURL = ''
-      if (header) {
-        headerHeight = getElementHeight(header)
-        headerDataURL = await toPng(header as HTMLElement)
-        addHeader()
-      }
+      const headerHeight = getElementHeight(header)
+      const footerHeight = getElementHeight(footer)
+      const [headerDataURL, footerDataURL] = await Promise.all([
+        await toPng(header.children[0] as HTMLElement),
+        await toPng(footer.children[0] as HTMLElement),
+      ])
+      addHeader(headerDataURL, headerHeight)
+      addFooter(footerDataURL, footerHeight)
 
-      const footer = document.getElementById('footer-pdf')
-      if (footer) {
-        footerHeight = getElementHeight(footer)
-        footerDataURL = await toPng(footer as HTMLElement)
-        addFooter()
-      }
+      let usedHeight = 0 + footerHeight + headerHeight
 
-      //loop for each children div
-      for (let i = 0; i < refNode.current.children.length; i++) {
-        const children = refNode.current.children[i]
+      for (let i = 0; i < refNode.children.length; i++) {
+        const children = refNode.children[i] as HTMLElement
         const childrenHeight = getElementHeight(children)
-        const canvasDataURL = await toPng(children as HTMLElement)
-        const isFull = childrenHeight + usedHeight > height
-        if (isFull) {
-
-          addPage()
-          //reset useHeight
-          usedHeight = 0 + footerHeight + headerHeight
+        if (childrenHeight < height) {
+          const canvasDataURL = await toPng(children as HTMLElement)
+          addImage(canvasDataURL, usedHeight - footerHeight, childrenHeight)
+          //last page
+          if (refNode.children.length !== i + 1) {
+            addPage()
+          }
+        } else {
+          await customizeAddPages(children)
+          //last page
+          if (refNode.children.length !== i - 1) {
+            addPage()
+          }
         }
-        addImage(canvasDataURL, usedHeight - footerHeight, childrenHeight)
       }
 
       //add footer pages 
@@ -55,8 +64,17 @@ export default function Home() {
         pdf.setPage(i)
         addFooterPageNumber(i)
       }
+      setStyleBack(refNode)
+      setStyleBack(footer)
+      setStyleBack(header)
 
-      pdf.save('New.pdf')
+      // window.open(pdf.output('bloburl') as unknown as string, '_blank')
+      // window.location.href = pdf.output('bloburl') as unknown as string
+      const iframeContainer = document.getElementById('iframe-container')
+      if (iframeContainer) {
+        iframeContainer.style.display = 'block';
+        (iframeContainer.children[0] as HTMLIFrameElement).src = pdf.output('datauristring')
+      }
 
 
       function addFooterPageNumber(page: number) {
@@ -64,6 +82,20 @@ export default function Home() {
         var footerX = pdf.internal.pageSize.getWidth() / 2
         var footerY = pdf.internal.pageSize.getHeight() - 10
         pdf.text(text, footerX, footerY, { align: 'center' })
+      }
+
+      async function customizeAddPages(node: HTMLElement) {
+        for (let i = 0; i < node.children.length; i++) {
+          const children = node.children[i]
+          const childrenHeight = getElementHeight(children)
+          const canvasDataURL = await toPng(children as HTMLElement)
+          const isFull = childrenHeight + usedHeight > height
+          if (isFull) {
+            addPage()
+          }
+          addImage(canvasDataURL, usedHeight - footerHeight, childrenHeight)
+          usedHeight += childrenHeight
+        }
       }
 
       function addImage(
@@ -79,38 +111,62 @@ export default function Home() {
           width,
           childrenHeight
         )
-        usedHeight += childrenHeight
       }
 
       function addPage() {
         pdf.addPage() //8.5" x 11" in pts (in*72)
-        page++
         if (header) {
-          addHeader()
+          addHeader(headerDataURL, headerHeight)
         }
         if (footer) {
-          addFooter()
+          addFooter(footerDataURL, footerHeight)
         }
+        //reset useHeight
+        usedHeight = 0 + footerHeight + headerHeight
       }
 
-      function addFooter() {
+      function addFooter(footerDataURL: string, footerHeight: number) {
         addImage(footerDataURL, height - footerHeight, footerHeight)
       }
 
-      function addHeader() {
+      function addHeader(headerDataURL: string, headerHeight: number) {
         addImage(headerDataURL, 0, headerHeight)
+      }
+      function setStyle(refNode: HTMLElement) {
+        refNode.style.display = 'block'
+        refNode.style.position = 'fixed'
+        refNode.style.left = '9999px'
+      }
+      function setStyleBack(refNode: HTMLElement) {
+        refNode.style.position = 'static'
+        refNode.style.bottom = '0px'
+        refNode.style.display = 'none'
       }
     }
   }
 
   return (
     <>
-      <header></header>
-      {/* <div id="header-pdf">This is header</div> */}
-      <button onClick={generatePDF}>Print this out!</button>
-      <ComponentToPrint ref={refNode} />
-      {/* <div id="footer-pdf">This is footer</div> */}
-      <footer></footer>
+      <div id="header-pdf">
+        <div className='header-container' >This is header</div>
+      </div>
+
+      {/* <ButtonPrint generatePDF={generatePDF} /> */}
+      {
+        isLoading
+          ? <>loading.....</>
+          : <div>
+            <button onClick={() => generatePDF()}>Print this out!</button>
+          </div>
+      }
+
+      <ComponentToPrint setIsLoading={setIsLoading} />
+      <div id='iframe-container' className="iframe-container">
+        <iframe className="responsive-iframe" src=""></iframe>
+      </div>
+      <div id="footer-pdf">
+        <div className='footer-container'>This is footer</div>
+      </div>
     </>
   )
 }
