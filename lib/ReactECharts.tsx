@@ -63,12 +63,7 @@ export default function ReactECharts({
 }: ReactEChartsProps): JSX.Element {
   const chartRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (chartRef.current !== null) {
-      const chart = getInstanceByDom(chartRef.current)
 
-    }
-  }, [onEvents])
 
   useEffect(() => {
     // Initialize chart
@@ -97,7 +92,6 @@ export default function ReactECharts({
       const chart = getInstanceByDom(chartRef.current)
       chart?.setOption(option, settings)
       if (onEvents) {
-        console.log(onEvents)
         Object.entries(onEvents).forEach(([key, val]) => {
           return chart?.on(key, val)
         })

@@ -29,29 +29,23 @@ const BarChart = () => {
     plotOptions: {
       bar: {
         borderRadius: 4,
-        horizontal: true,
+        horizontal: false,
       }
     },
     xaxis: {
-      categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy', 'France', 'Japan',
-        'United States', 'China', 'Germany'
-      ],
-    }
+      type: 'numeric',
+      min: 0,
+      max: 10,
+    },
   }
-  const series = [{
-    data: [{
-      x: 'category A',
-      y: 10
-    }, {
-      x: 'category B',
-      y: 18
-    }, {
-      x: 'category C',
-      y: 13
-    }]
-  }]
+  const series = [
+    {
+      name: 'y',
+      data: [[1, 1], [2, 3], [3, 1], [4, 2], [5, 5], [6, 2], [7, 1]]
+    }
+  ]
   return (
-    <Chart options={options} series={series} width={500} height={400}></Chart>
+    <Chart options={options} series={series} type='bar' width={500} height={400}></Chart>
   )
 }
 export default memo(BarChart)

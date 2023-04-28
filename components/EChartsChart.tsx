@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 const ReactECharts = dynamic(() => import('@/lib/ReactECharts'), { ssr: false })
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useState } from 'react'
 
 
 
@@ -27,12 +27,38 @@ const EChartsChart = () => {
     }
   }
 
-  const [option, setOption] = useState<any>({
-    legend: {
-      data: ['bar', 'bar2', 'bar3', 'bar4'],
-      left: '10%'
+  const data = [
+    {
+      name: 'Solicitados',
+      value: 18203,
     },
+    {
+      name: 'Aprobados',
+      value: 12000,
+    },
+    {
+      name: 'Aceptados',
+      value: 13203,
+    },
+    {
+      name: 'Cerrados',
+      value: 8203,
+    },
+    {
+      name: 'Negados',
+      value: 1203,
+    },
+    {
+      name: 'En revision',
+      value: 6203,
+    },
+    {
+      name: 'En mora',
+      value: 2203,
+    },
+  ]
 
+  const [option, setOption] = useState<any>({
     brush: {
       // toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
       brushType: 'rect',
@@ -41,10 +67,9 @@ const EChartsChart = () => {
       throttleType: 'debounce',
       throttleDelay: 300,
     },
-
     tooltip: {},
     xAxis: {
-      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      data
     },
     yAxis: {},
     grid: {
@@ -57,8 +82,6 @@ const EChartsChart = () => {
       }
     ]
   })
-
-
 
   function onBrushSelected(event: any) {
     let brushed: string[] = []
