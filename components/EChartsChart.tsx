@@ -1,16 +1,13 @@
 // import Echarts from 'echarts-for-react'
+
 import dynamic from 'next/dynamic'
-const Echarts = dynamic(() => import('echarts-for-react'), { ssr: false })
+const ReactECharts = dynamic(() => import('@/lib/ReactECharts'), { ssr: false })
 import { memo, useEffect, useRef, useState } from 'react'
 
 
 
 
-
 const EChartsChart = () => {
-
-
-  // const myChart = Echarts.init(chartDom);
   let xAxisData = []
   let data1 = []
   let data2 = []
@@ -29,6 +26,7 @@ const EChartsChart = () => {
       shadowColor: 'rgba(0,0,0,0.3)'
     }
   }
+
   const [option, setOption] = useState<any>({
     legend: {
       data: ['bar', 'bar2', 'bar3', 'bar4'],
@@ -43,20 +41,10 @@ const EChartsChart = () => {
       throttleType: 'debounce',
       throttleDelay: 300,
     },
-    toolbox: {
-      feature: {
-        magicType: {
-          type: ['stack']
-        },
-      }
-    },
+
     tooltip: {},
     xAxis: {
-      data: xAxisData,
-      name: 'X Axis',
-      axisLine: { onZero: true },
-      splitLine: { show: false },
-      splitArea: { show: false }
+      data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
     },
     yAxis: {},
     grid: {
@@ -64,32 +52,8 @@ const EChartsChart = () => {
     },
     series: [
       {
-        name: 'bar',
         type: 'bar',
-        stack: 'one',
-        emphasis: emphasisStyle,
-        data: data1
-      },
-      {
-        name: 'bar2',
-        type: 'bar',
-        stack: 'one',
-        emphasis: emphasisStyle,
-        data: data2
-      },
-      {
-        name: 'bar3',
-        type: 'bar',
-        stack: 'two',
-        emphasis: emphasisStyle,
-        data: data3
-      },
-      {
-        name: 'bar4',
-        type: 'bar',
-        stack: 'two',
-        emphasis: emphasisStyle,
-        data: data4
+        data: [23, 24, 18, 25, 27, 28, 25]
       }
     ]
   })
@@ -101,19 +65,19 @@ const EChartsChart = () => {
     const brushComponent = event.batch[0]
     for (let sIdx = 0; sIdx < brushComponent.selected.length; sIdx++) {
       const rawIndices = brushComponent.selected[sIdx].dataIndex
-      brushed.push('[Series ' + sIdx + '] ' + rawIndices.join(', '))
+      brushed.push(rawIndices.join(', '))
     }
     console.log(brushed)
   };
 
   return (
     <div id='echarts' >
-      <Echarts
-        className='echarts-test'
+      <ReactECharts
         option={option}
         onEvents={{
           brushSelected: onBrushSelected
-        }}></Echarts>
+        }}
+      ></ReactECharts>
     </div>
   )
 }

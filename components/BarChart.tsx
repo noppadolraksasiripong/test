@@ -5,12 +5,12 @@ import dynamic from 'next/dynamic'
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false })
 const BarChart = () => {
   const options: ApexOptions = {
+
     chart: {
       type: 'bar',
       height: 350,
       selection: {
         enabled: true,
-        type: "xy",
         fill: {
           color: "#24292e",
           opacity: 0.1
@@ -21,7 +21,7 @@ const BarChart = () => {
       },
       events: {
         selection: function (chart, e) {
-          console.log(chart, e)
+          console.log(chart)
         }
       }
 
@@ -39,7 +39,16 @@ const BarChart = () => {
     }
   }
   const series = [{
-    data: [400, 430, 448, 470, 540, 580, 690, 1100, 1200, 1380]
+    data: [{
+      x: 'category A',
+      y: 10
+    }, {
+      x: 'category B',
+      y: 18
+    }, {
+      x: 'category C',
+      y: 13
+    }]
   }]
   return (
     <Chart options={options} series={series} width={500} height={400}></Chart>
