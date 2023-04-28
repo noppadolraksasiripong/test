@@ -12,7 +12,7 @@ const ComponentToPrint = ({ setIsLoading }: Props) => {
   setIsLoading(false)
   return (
     <div id="invoice">
-      <div id="pspdfkit-header">
+      {/* <div id="pspdfkit-header">
         <div className="header-columns">
           <div className="logotype">
 
@@ -23,7 +23,7 @@ const ComponentToPrint = ({ setIsLoading }: Props) => {
             <p>[Company Info]</p>
           </div>
         </div>
-      </div>
+      </div> */}
 
 
       <div className="page">
@@ -681,7 +681,7 @@ const ComponentToPrint = ({ setIsLoading }: Props) => {
       </div>
 
       {/* <div className="page" style="page-break-after: always;"> */}
-      <div className="page" >
+      {/* <div className="page" >
         <div>
           <h4>Thank you for your purchase!</h4>
         </div>
@@ -751,7 +751,7 @@ const ComponentToPrint = ({ setIsLoading }: Props) => {
         <div className="inside border2"> Hello world2</div>
         <div className="inside border3"> Hello world3</div>
         <div className="inside border4"> Hello world4</div>
-      </div>
+      </div> */}
       <div>
 
         <BarChart />
