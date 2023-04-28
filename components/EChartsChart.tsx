@@ -1,7 +1,7 @@
 // import Echarts from 'echarts-for-react'
 import dynamic from 'next/dynamic'
 const Echarts = dynamic(() => import('echarts-for-react'), { ssr: false })
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 
 
 
@@ -118,4 +118,4 @@ const EChartsChart = () => {
   )
 }
 
-export default EChartsChart
+export default memo(EChartsChart)
