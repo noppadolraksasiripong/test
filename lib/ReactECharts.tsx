@@ -1,47 +1,38 @@
-import { useRef, useEffect, CSSProperties } from "react"
-import { CanvasRenderer } from "echarts/renderers"
-import { init, getInstanceByDom, use } from "echarts/core"
-import { HeatmapChart, ScatterChart, LineChart, GraphChart, BarChart } from "echarts/charts"
+import { BarChart, BarSeriesOption, LineChart, LineSeriesOption, PieChart, PieSeriesOption } from 'echarts/charts'
 import {
-  LegendComponent,
-  GridComponent,
-  TooltipComponent,
-  ToolboxComponent,
-  VisualMapComponent,
-  TitleComponent,
-  DataZoomComponent,
-  BrushComponent
-} from "echarts/components"
-import type { ECharts, ComposeOption, SetOptionOpts, ElementEvent } from "echarts/core"
-import type {
-  BarSeriesOption,
-  LineSeriesOption,
-  ScatterSeriesOption,
-} from "echarts/charts"
-import type { TitleComponentOption, GridComponentOption, BrushComponentOption } from "echarts/components"
+  BrushComponentOption,
+  GridComponentOption,
+  TitleComponentOption,
+  TooltipComponent
+} from 'echarts/components'
+import { getInstanceByDom, init, Payload, use } from 'echarts/core'
+import { SVGRenderer } from 'echarts/renderers'
+import { CSSProperties, memo, PropsWithChildren, useEffect, useRef, useState } from 'react'
+
+import type { ECharts, ComposeOption, SetOptionOpts } from 'echarts/core'
 // Register the required components
 use([
-  LegendComponent,
-  ScatterChart,
+  // LegendComponent,
   LineChart,
   BarChart,
-  GridComponent,
+  PieChart,
+  // GridComponent,
   TooltipComponent,
-  TitleComponent,
-  ToolboxComponent, // A group of utility tools, which includes export, data view, dynamic type switching, data area zooming, and reset.
-  DataZoomComponent, // Used in Line Graph Charts
-  CanvasRenderer, // If you only need to use the canvas rendering mode, the bundle will not include the SVGRenderer module, which is not needed.
-  BrushComponent
+  // TitleComponent,
+  // ToolboxComponent,
+  SVGRenderer,
+  // BrushComponent,
+  // GraphicComponent,
 ])
 
 // Combine an Option type with only required components and charts via ComposeOption
 export type EChartsOption = ComposeOption<
   | BarSeriesOption
-  | LineSeriesOption
   | TitleComponentOption
   | GridComponentOption
-  | ScatterSeriesOption
   | BrushComponentOption
+  | LineSeriesOption
+  | PieSeriesOption
 >
 
 export interface ReactEChartsProps {
@@ -49,62 +40,118 @@ export interface ReactEChartsProps {
   style?: CSSProperties
   settings?: SetOptionOpts
   loading?: boolean
-  theme?: "light" | "dark"
+  theme?: 'light' | 'dark'
   onEvents?: Record<string, (...args: unknown[]) => boolean | void>
+  dispatchAction?: Record<string, Payload>
+  height?: number
+  width?: number | string
 }
 
-export default function ReactECharts({
+function ReactECharts({
   option,
   style,
   settings,
   loading,
   theme,
-  onEvents
-}: ReactEChartsProps): JSX.Element {
+  onEvents,
+  height,
+  width,
+  dispatchAction,
+  children
+}: PropsWithChildren<ReactEChartsProps>): JSX.Element {
   const chartRef = useRef<HTMLDivElement>(null)
-
-
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     // Initialize chart
     let chart: ECharts | undefined
     if (chartRef.current !== null) {
-      chart = init(chartRef.current, theme)
+      chart = init(chartRef.current, theme, {
+        ssr: false,
+      })
     }
 
     // Add chart resize listener
-    // ResizeObserver is leading to a bit janky UX
     function resizeChart() {
       chart?.resize()
     }
-    window.addEventListener("resize", resizeChart)
+    window.addEventListener('resize', resizeChart)
+
+    if (chartRef.current !== null) {
+      const chart = getInstanceByDom(chartRef.current)
+    }
 
     // Return cleanup function
     return () => {
       chart?.dispose()
-      window.removeEventListener("resize", resizeChart)
+      window.removeEventListener('resize', resizeChart)
     }
-  }, [theme])
+  }, [height, theme, width])
 
   useEffect(() => {
     // Update chart
     if (chartRef.current !== null) {
       const chart = getInstanceByDom(chartRef.current)
       chart?.setOption(option, settings)
-      if (onEvents) {
-        Object.entries(onEvents).forEach(([key, val]) => {
-          return chart?.on(key, val)
-        })
+      //  more info about onEvents and dispatchAction 
+      // https://apache.github.io/echarts-handbook/en/concepts/event/ 
+      if (!mounted && setMounted) {
+        if (onEvents) {
+          Object.entries(onEvents).forEach(([key, val]) => {
+            chart?.on(key, val)
+            if (key === 'brushSelected') {
+              chart?.on('brushEnd', () => {
+                // clear brush selection after stop dragging
+                const dispatchRemoveBrush = {
+                  type: 'brush',
+                  command: 'clear',
+                  areas: [],
+                }
+                chart?.dispatchAction(dispatchRemoveBrush)
+              })
+            }
+          })
+        }
+
+        if (!!dispatchAction) {
+          Object.entries(dispatchAction).forEach(([key, val]) => {
+            chart?.dispatchAction(val)
+          })
+        }
+        setMounted(true)
       }
     }
-  }, [onEvents, option, settings, theme]) // Whenever theme changes we need to add option and setting due to it being deleted in cleanup function
+  }, [dispatchAction, mounted, onEvents, option, setMounted, settings, theme])
 
   useEffect(() => {
-    // Update chart
+    // if chart loading
     if (chartRef.current !== null) {
       const chart = getInstanceByDom(chartRef.current)
       loading === true ? chart?.showLoading() : chart?.hideLoading()
     }
   }, [loading, theme])
-  return <div ref={chartRef} style={{ width: "100%", height: "300px", ...style }} />
+
+  return (
+    <div className={"echarts-container"} >
+      <div
+        ref={chartRef}
+        style={{
+          width: width ?? '100%',
+          minWidth: width ?? '100%',
+          height: height ?? 300,
+          minHeight: height ?? 300,
+          ...style,
+        }}
+      />
+      {
+        children
+        &&
+        <>
+          {children}
+        </>
+      }
+    </div>
+  )
 }
+
+export default ReactECharts

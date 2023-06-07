@@ -1,13 +1,17 @@
-// import Echarts from 'echarts-for-react'
+import ReactECharts, { EChartsOption } from '@/lib/ReactECharts'
 
-import dynamic from 'next/dynamic'
-const ReactECharts = dynamic(() => import('@/lib/ReactECharts'), { ssr: false })
-import { memo, useState } from 'react'
-
-
-
+import { memo } from 'react'
 
 const EChartsChart = () => {
+
+  if (typeof window !== 'undefined') {
+    document.addEventListener("click", function () {
+      // Do what you want with click event
+
+    }, false)
+  }
+
+  // const myChart = Echarts.init(chartDom);
   let xAxisData = []
   let data1 = []
   let data2 = []
@@ -57,51 +61,41 @@ const EChartsChart = () => {
       value: 2203,
     },
   ]
+  const progressData = [
+    { percent: 30, name: 'test1', color: 'red' },
+    { percent: 20, name: 'test2', color: 'blue' },
+    { percent: 50, name: 'test3', color: 'green' }
+  ]
 
-  const [option, setOption] = useState<any>({
-    brush: {
-      // toolbox: ['rect', 'polygon', 'lineX', 'lineY', 'keep', 'clear'],
-      brushType: 'rect',
-      toolbox: ['rect'],
-      xAxisIndex: 0,
-      throttleType: 'debounce',
-      throttleDelay: 300,
-    },
-    tooltip: {},
-    xAxis: {
-      data
-    },
-    yAxis: {},
-    grid: {
-      bottom: 100
-    },
+  const option: EChartsOption = {
+
     series: [
       {
-        type: 'bar',
-        data: [23, 24, 18, 25, 27, 28, 25]
-      }
-    ]
-  })
+        animation: false,
+        name: '',
+        type: 'pie',
+        radius: ['78%', '100%'],
+        label: {
+          show: false,
+        },
+        emphasis: {
+          scale: false,
+        },
+        data: progressData.map((progress) => ({
+          value: progress.percent,
+          name: progress.name,
+          itemStyle: { color: progress.color },
+        })),
+      },
+    ],
+  }
 
-  function onBrushSelected(event: any) {
-    let brushed: string[] = []
-    const brushComponent = event.batch[0]
-    for (let sIdx = 0; sIdx < brushComponent.selected.length; sIdx++) {
-      const rawIndices = brushComponent.selected[sIdx].dataIndex
-      brushed.push(rawIndices.join(', '))
-    }
-    console.log(brushed)
-  };
+
 
   return (
-    <div id='echarts' >
-      <ReactECharts
-        option={option}
-        onEvents={{
-          brushSelected: onBrushSelected
-        }}
-      ></ReactECharts>
-    </div>
+    <ReactECharts option={option} height={160} width={160}>
+
+    </ReactECharts>
   )
 }
 
